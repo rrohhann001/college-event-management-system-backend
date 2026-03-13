@@ -233,3 +233,8 @@ spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
 
 **Register for events**
 - student apne token ko authorize mai daal ke register kar sakte hai events mai event ki id daal kar.
+
+**Abhi ye backend kya nahi kar sakta(drawback)**
+
+- koi bhi student kisi ki bhi gmail ke through sign up kar sakta hai means account create kar sakta hai bina ush gmail vale person ko pata lage.
+- student ko sign up karne ke baad login karna padta hai token lene ke liye jis se vo apni profile, events, participate, kar sake.
