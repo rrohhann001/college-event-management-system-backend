@@ -182,7 +182,7 @@ GitHub
 https://github.com/rrohhann001
 
 LinkedIn  
-(Add your LinkedIn profile link here)
+https://www.linkedin.com/in/rohan-singh-1515693b4
 
 ---
 
