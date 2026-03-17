@@ -3,13 +3,17 @@ package com.cems.eventManagement.controller;
 import com.cems.eventManagement.dto.StudentDto;
 import com.cems.eventManagement.entity.Student;
 import com.cems.eventManagement.repository.StudentRepository;
+import com.cems.eventManagement.security.JwtUtil;
 import com.cems.eventManagement.services.StudentService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("api/student")
@@ -21,9 +25,54 @@ public class StudentController {
     @Autowired
     private StudentRepository studentRepository;
 
-    @PostMapping
-    public Student registerStudent(@Valid @RequestBody Student student){
-        return studentService.registerStudent(student);
+//    @PostMapping
+//    public Student registerStudent(@Valid @RequestBody Student student){
+//        return studentService.registerStudent(student);
+//    } ye sirf student ko database mai save kar ke student detail return kar dega, without token.
+
+
+    @PostMapping("/register")
+    public ResponseEntity<Map<String, String>> registerStudent(@Valid @RequestBody Student student){
+
+        student.setRole("STUDENT");
+
+        String msg = studentService.initiateRegistration(student);
+
+        Map<String, String> response=new HashMap<>();
+        response.put("Message", msg);
+
+        if(msg.startsWith("Error")){
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        return ResponseEntity.ok(response);
+
+    }
+    @PostMapping("/verify")
+    public ResponseEntity<?> verifyOtp(@RequestParam String email, @RequestParam String otp){
+
+        try {
+            Student saveStudent=studentService.verifyOtpAndSave(email, otp);
+
+            String token= JwtUtil.generateToken(saveStudent.getEmail(),saveStudent.getRole());
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("Message", "Registration Successful !");
+            response.put("token", token);
+            response.put("email", saveStudent.getEmail());
+            response.put("name", saveStudent.getName());
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("Error", e.getMessage());
+            return ResponseEntity.badRequest().body(errorResponse);
+
+        }
+
+
     }
 
     @GetMapping
