@@ -14,6 +14,8 @@ import lombok.NoArgsConstructor;
 @Table(name="students")
 @NoArgsConstructor
 public class Student {
+
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -41,6 +43,15 @@ public class Student {
     @Column(nullable = false,unique = true)
     private String rollNumber;
 
+    @JsonIgnore
     @Column(nullable = false)
     private String role="Student";
+
+    @JsonIgnore
+    private String otp;
+
+
+    @Column(nullable = false)
+    @JsonIgnore
+    private boolean isVerified=false;
 }

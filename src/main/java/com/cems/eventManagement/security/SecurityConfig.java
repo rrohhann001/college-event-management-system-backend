@@ -25,7 +25,7 @@ public class SecurityConfig {
 
                         // 1. Inko bina token ke allow karo (Login karne ke liye aur Swagger UI dekhne ke liye
                         .requestMatchers("/api/auth/login", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/student").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/student/register","/api/student/verify").permitAll()
 
                         .requestMatchers("/api/student/my-profile").authenticated()
                         .requestMatchers("/api/registrations/my-events").authenticated()
