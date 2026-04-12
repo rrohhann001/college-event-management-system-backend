@@ -3,15 +3,20 @@ package com.cems.eventManagement.services;
 import com.cems.eventManagement.dto.StudentDto;
 import com.cems.eventManagement.entity.Student;
 import com.cems.eventManagement.repository.StudentRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Slf4j
 @Component
 public class StudentService {
 
@@ -21,22 +26,32 @@ public class StudentService {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    private static final long OTP_Expiration_Time=60000;
+
     private Map<String,PendingStudent> waitingRoom = new ConcurrentHashMap<>();
 
 
     public String initiateRegistration(Student student){
+        log.info("Registration initiated for email: {}", student.getEmail());
         if(studentRepository.existsByEmail(student.getEmail())){
+            log.warn("Duplicate registration attempt for email: {}", student.getEmail());
             return "Error: This email is already registered";
         }
 
-        student.setRole("Student");
+        student.setRole("STUDENT");
+
+        String encryptPassword = passwordEncoder.encode(student.getPassword());
+        student.setPassword(encryptPassword);
 
         String generatedOtp = String.format("%06d", new Random().nextInt(999999));
 
         waitingRoom.put(student.getEmail(), new PendingStudent(student, generatedOtp, System.currentTimeMillis()));
         emailService.sendOtpMail(student.getEmail(), generatedOtp);
 
-        return "Success: The otp has been sent to your email. Please verify within 30 seconds.";
+        return "Success: The otp has been sent to your email. Please verify within 1 minute.";
     }
 
 
@@ -51,7 +66,7 @@ public class StudentService {
         long currentTime = System.currentTimeMillis();
         long elapcedTime = currentTime - pendingStudent.timestamp;
 
-        if(elapcedTime>=60000){
+        if(elapcedTime>=OTP_Expiration_Time){
             waitingRoom.remove(email);
             throw new Exception("Error: OTP Expired! Please register again") ;
         }
@@ -62,7 +77,6 @@ public class StudentService {
 
         Student studentToSave=pendingStudent.student;
         studentToSave.setVerified(true);
-        studentToSave.setOtp(otp);
 
         Student savedStudent = studentRepository.save(studentToSave);
         waitingRoom.remove(email);
@@ -71,52 +85,64 @@ public class StudentService {
 
 
     }
-//    public Student registerStudent(Student student){
+
+    @Scheduled(fixedRate = 120000)
+    public void cleanupExpiredOtp(){
+        long currentTime = System.currentTimeMillis();
+        waitingRoom.entrySet().removeIf(entry ->
+                currentTime - entry.getValue().timestamp > OTP_Expiration_Time
+        );
+    }
+
+    private StudentDto convertToDto(Student student){
+
+        StudentDto dto =new StudentDto();
+        dto.setId(student.getId());
+        dto.setName(student.getName());
+        dto.setEmail(student.getEmail());
+        dto.setCourse(student.getCourse());
+        dto.setRollNumber(student.getRollNumber());
+
+        return dto;
+    }
+
+
+    public Page<StudentDto> getAllStudents(Pageable pageable){
+        Page<Student> studentPage = studentRepository.findAll(pageable);
+
+        return studentPage.map(this::convertToDto);
+        //pehle ye sab alag alag krana padta tha lekin method banane ke baad bss itna karna padta hai
+
+//        List<Student> students = studentRepository.findAll();
+//        List<StudentDto> studentDtos=new ArrayList<>();
+//        for(Student student:students){
 //
-//        String generatedOtp = String.format("%06d", new Random().nextInt(999999));
+//            StudentDto dto=new StudentDto();
+//            dto.setId(student.getId());
+//            dto.setName(student.getName());
+//            dto.setCourse(student.getCourse());
+//            dto.setEmail(student.getEmail());
+//            dto.setRollNumber(student.getRollNumber());
 //
-//        student.setOtp(generatedOtp);
-//        student.setVerified(false);
+//            studentDtos.add(dto);
 //
-//        Student savedStudent = studentRepository.save(student);
-//
-//        emailService.sendOtpMail(savedStudent.getEmail(), generatedOtp);
-//
-//        return savedStudent;
-//    }
-
-
-    public List<StudentDto> getAllStudents(){
-        List<Student> students = studentRepository.findAll();
-
-        List<StudentDto> studentDtos=new ArrayList<>();
-
-        for(Student student:students){
-
-            StudentDto dto=new StudentDto();
-            dto.setId(student.getId());
-            dto.setName(student.getName());
-            dto.setCourse(student.getCourse());
-            dto.setEmail(student.getEmail());
-            dto.setRollNumber(student.getRollNumber());
-
-            studentDtos.add(dto);
-
-        }
-        return studentDtos;
+//        }
+//        return studentDtos;
     }
 
 
     public StudentDto getStudentById(Long id){
         Student student = studentRepository.findById(id).orElseThrow(()-> new RuntimeException("Student not found"));
-        StudentDto dto=new StudentDto();
-        dto.setId(student.getId());
-        dto.setName(student.getName());
-        dto.setCourse(student.getCourse());
-        dto.setEmail(student.getEmail());
-        dto.setRollNumber(student.getRollNumber());
 
-        return dto;
+//        StudentDto dto=new StudentDto();
+//        dto.setId(student.getId());
+//        dto.setName(student.getName());r5r
+//        dto.setCourse(student.getCourse());
+//        dto.setEmail(student.getEmail());
+//        dto.setRollNumber(student.getRollNumber());
+//        return dto;
+
+        return convertToDto(student);
 
     }
 
@@ -127,24 +153,15 @@ public class StudentService {
 
 
     public List<StudentDto> getStudentsByCourse(String course) {
-        List<Student> students= studentRepository.findStudentsByCourse(course);
+        return studentRepository.findStudentsByCourse(course)
+                .stream()
+                .map(this::convertToDto)
+                .toList();
+    }
 
-        List<StudentDto> studentDtos=new ArrayList<>();
-
-        for(Student student:students){
-
-            StudentDto dto=new StudentDto();
-            dto.setId(student.getId());
-            dto.setName(student.getName());
-            dto.setCourse(student.getCourse());
-            dto.setEmail(student.getEmail());
-            dto.setRollNumber(student.getRollNumber());
-
-            studentDtos.add(dto);
-
-        }
-        return studentDtos;
-
+    public boolean isOwnProfile(Long studentId, String email){
+        Student student = studentRepository.findById(studentId).orElse(null);
+        return student != null && student.getEmail().equals(email);
     }
 
 

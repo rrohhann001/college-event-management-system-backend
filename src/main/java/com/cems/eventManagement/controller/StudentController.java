@@ -7,7 +7,11 @@ import com.cems.eventManagement.security.JwtUtil;
 import com.cems.eventManagement.services.StudentService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -24,6 +28,9 @@ public class StudentController {
 
     @Autowired
     private StudentRepository studentRepository;
+
+    @Autowired
+    private JwtUtil jwtUtil;
 
 //    @PostMapping
 //    public Student registerStudent(@Valid @RequestBody Student student){
@@ -54,7 +61,7 @@ public class StudentController {
         try {
             Student saveStudent=studentService.verifyOtpAndSave(email, otp);
 
-            String token= JwtUtil.generateToken(saveStudent.getEmail(),saveStudent.getRole());
+            String token= jwtUtil.generateToken(saveStudent.getEmail(),saveStudent.getRole());
 
             Map<String, Object> response = new HashMap<>();
             response.put("Message", "Registration Successful !");
@@ -72,12 +79,16 @@ public class StudentController {
 
         }
 
-
     }
 
     @GetMapping
-    public List<StudentDto> getAllStudents(){
-        return studentService.getAllStudents();
+    public ResponseEntity<Page<StudentDto>> getAllStudents(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ){
+        Pageable pageable = PageRequest.of(page, size);
+        Page<StudentDto> studentsPage = studentService.getAllStudents(pageable);
+        return ResponseEntity.ok(studentsPage);
     }
 
     @GetMapping("/{id}")
@@ -108,7 +119,8 @@ public class StudentController {
     }
 
     @DeleteMapping("/{id}")
-    public String deleteStudent(@PathVariable Long id){
+    @PreAuthorize("hasAuthority('ADMIN') or @studentService.isOwnProfile(#id, authentication.name)")
+    public String deleteStudent(@PathVariable Long id, Principal principal){
         studentService.deleteStudent(id);
         return "Student with ID " + id + " has been deleted.";
     }

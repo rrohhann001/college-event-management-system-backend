@@ -30,11 +30,19 @@ public class RegistrationService {
 
         Event event=eventRepository.findById(eventId).orElseThrow(()->new RuntimeException("Event not found"));
 
+        // 1. Check karein ki student pehle se toh registered nahi hai
         Optional<Registration> existingRegistration=registrationRepository.findByStudentIdAndEventId(student.getId(),eventId);
         if(existingRegistration.isPresent()){
             throw new RuntimeException("Student already registered in this event");
         }
 
+        //CAPACITY CHECK
+        long registrationCount = registrationRepository.countByEventId(eventId);
+        if(registrationCount >= event.getCapacity()){
+            throw new RuntimeException("Event is full, Cannot register");
+        }
+
+        // 3. Agar sab theek hai toh register kar dein
         Registration registration=new Registration();
         registration.setStudent(student);
         registration.setEvent(event);

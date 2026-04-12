@@ -28,6 +28,9 @@ public class Event {
     @Column(nullable = false)
     private String location;
 
+    @Column(name = "capacity", nullable = false)
+    private int capacity;
+
     @JsonIgnore
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Registration> registrations;
