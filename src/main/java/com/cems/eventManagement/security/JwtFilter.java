@@ -4,6 +4,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -18,6 +19,9 @@ import java.util.List;
 
 @Component
 public class JwtFilter extends OncePerRequestFilter {
+
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @Override
     protected void doFilterInternal(
@@ -35,7 +39,7 @@ public class JwtFilter extends OncePerRequestFilter {
         if(authHeader!=null&&authHeader.startsWith("Bearer ")){
             token=authHeader.substring(7);
             try {
-                email=JwtUtil.extractEmail(token);
+                email=jwtUtil.extractEmail(token);
             } catch (Exception e){
                 System.out.println("Invalid Token");
             }
@@ -44,9 +48,9 @@ public class JwtFilter extends OncePerRequestFilter {
 
         // 3. Agar token sahi hai aur user abhi login nahi hai, toh usko login (authenticate) kar do
         if(email!=null && SecurityContextHolder.getContext().getAuthentication()==null){
-            if(JwtUtil.validateToken(token)){
+            if(jwtUtil.validateToken(token)){
 
-                String role=JwtUtil.extractRole(token);
+                String role=jwtUtil.extractRole(token);
 
                 List<GrantedAuthority> authorities= Collections.singletonList(new SimpleGrantedAuthority(role));
 

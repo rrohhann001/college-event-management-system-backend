@@ -45,8 +45,9 @@ public class Student {
 
     @JsonIgnore
     @Column(nullable = false)
-    private String role="Student";
+    private String role="STUDENT";
 
+    @Transient
     @JsonIgnore
     private String otp;
 

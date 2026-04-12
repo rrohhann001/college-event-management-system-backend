@@ -14,6 +14,9 @@ public class AuthService {
     @Autowired
     private StudentRepository studentRepository;
 
+    @Autowired
+    private JwtUtil jwtUtil;
+
     public LoginResponse login(LoginRequest request){
         Student student=studentRepository.findByEmail(request.getEmail()).orElseThrow(()-> new RuntimeException("Student not found"));
 
@@ -21,7 +24,7 @@ public class AuthService {
             throw new RuntimeException("Invalid Password");
         }
 
-        String token= JwtUtil.generateToken(student.getEmail(), student.getRole());
+        String token= jwtUtil.generateToken(student.getEmail(), student.getRole());
 
         return new LoginResponse(token);
     }
