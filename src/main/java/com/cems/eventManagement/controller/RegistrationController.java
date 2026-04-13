@@ -35,12 +35,15 @@ public class RegistrationController {
     @GetMapping("/my-events")
     public ResponseEntity<ApiResponse<List<Event>>> getStudentRegistrations(Principal principal){
         List<Event> events = registrationService.getRegistrationsByStudentEmail(principal.getName());
-        return ResponseEntity.ok(new ApiResponse<>(true, "Your registered events retrieved, events"));
+        return ResponseEntity.ok(new ApiResponse<>(true, "Your registered events retrieved, events",events));
     }
 
     @DeleteMapping("/cancel/event/{eventId}")
     public ResponseEntity<ApiResponse<String>> cancelRegistration(@PathVariable Long eventId, Principal principal){
         String msg = registrationService.cancelRegistration(principal.getName(), eventId);
-        return ResponseEntity.ok(new ApiResponse<>(true,msg));
+        if(msg.startsWith("Error")) {
+            return ResponseEntity.badRequest().body(new ApiResponse<>(false, msg));
+        }
+        return ResponseEntity.ok(new ApiResponse<>(true, msg));
     }
 }
