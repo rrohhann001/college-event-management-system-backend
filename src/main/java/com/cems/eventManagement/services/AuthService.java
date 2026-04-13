@@ -6,6 +6,7 @@ import com.cems.eventManagement.entity.Student;
 import com.cems.eventManagement.repository.StudentRepository;
 import com.cems.eventManagement.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -17,10 +18,13 @@ public class AuthService {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     public LoginResponse login(LoginRequest request){
         Student student=studentRepository.findByEmail(request.getEmail()).orElseThrow(()-> new RuntimeException("Student not found"));
 
-        if(!student.getPassword().equals(request.getPassword())){
+        if(!passwordEncoder.matches(request.getPassword(),student.getPassword())){
             throw new RuntimeException("Invalid Password");
         }
 

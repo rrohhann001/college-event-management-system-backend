@@ -19,7 +19,7 @@ public class JwtUtil {
     private String secret;
 
     @Value("${jwt.expiration:86400000}")
-    private String expiration;
+    private long expiration;
 
     private Key key;
 
@@ -35,7 +35,7 @@ public class JwtUtil {
                 .setSubject(email)
                 .setIssuedAt(new Date())
                 .setExpiration(
-                        new Date(System.currentTimeMillis()+86400000)
+                        new Date(System.currentTimeMillis()+expiration)
                 )
                 .signWith(key)
                 .compact();

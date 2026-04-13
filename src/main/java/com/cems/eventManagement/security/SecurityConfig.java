@@ -43,7 +43,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/student/my-profile").authenticated()
                         .requestMatchers("/api/registrations/my-events").authenticated()
 
-                        .requestMatchers(HttpMethod.DELETE, "/api/student/**").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/student/**").hasAuthority("ADMIN")
 
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/events").hasAuthority("ADMIN")
                         //.requestMatchers(org.springframework.http.HttpMethod.PUT, "/api/events/**").hasAuthority("ADMIN")

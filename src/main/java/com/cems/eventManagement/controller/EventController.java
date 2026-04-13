@@ -1,8 +1,11 @@
 package com.cems.eventManagement.controller;
 
+import com.cems.eventManagement.dto.ApiResponse;
 import com.cems.eventManagement.entity.Event;
 import com.cems.eventManagement.services.EventService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,27 +21,31 @@ public class EventController {
     // Get all events
     // GET: http://localhost:8080/api/events
     @GetMapping
-    public List<Event> getAllEvents() {
-        return eventService.getAllEvent();
+    public ResponseEntity<ApiResponse<List<Event>>> getAllEvents() {
+        List<Event> events =  eventService.getAllEvent();
+        return ResponseEntity.ok(new ApiResponse<>(true,"All events retrieved successfully", events));
     }
 
     // Get event by ID
     // GET: http://localhost:8080/api/events/1
     @GetMapping("/{id}")
-    public Event getEventById(@PathVariable Long id) {
-        return eventService.getEventById(id);
+    public ResponseEntity<ApiResponse<Event>> getEventById(@PathVariable Long id) {
+        Event event = eventService.getEventById(id);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Event details retrieved", event));
     }
 
     @GetMapping("/date/{eventDate}")
-     public List<Event> getEventsByDate(@PathVariable String eventDate){
-        return eventService.getEventsByDate(eventDate);
+     public ResponseEntity<ApiResponse<List<Event>>> getEventsByDate(@PathVariable String eventDate){
+        List<Event> events = eventService.getEventsByDate(eventDate);
+        return ResponseEntity.ok(new ApiResponse<>(true,"Event details retrieved", events));
     }
 
     // Create event
     // POST: http://localhost:8080/api/events
     @PostMapping
-    public Event createEvent(@RequestBody Event event) {
-        return eventService.createEvent(event);
+    public ResponseEntity<ApiResponse<Event>> createEvent(@Valid @RequestBody Event eventDate) {
+        Event createdEvent = eventService.createEvent(eventDate);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Event created successfully", createdEvent));
     }
 
     // Update event
@@ -51,7 +58,8 @@ public class EventController {
     // Delete event
     // DELETE: http://localhost:8080/api/events/1
     @DeleteMapping("/{id}")
-    public void deleteEvent(@PathVariable Long id) {
-        eventService.deleteEvent(id);
+    public ResponseEntity<ApiResponse<Event>> deleteEvent(@PathVariable Long id) {
+       eventService.deleteEvent(id);
+       return ResponseEntity.ok(new ApiResponse<>(true,"Event with ID " + id + " has been deleted successfully"));
     }
 }

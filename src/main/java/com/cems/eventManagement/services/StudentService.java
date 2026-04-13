@@ -77,6 +77,7 @@ public class StudentService {
 
         Student studentToSave=pendingStudent.student;
         studentToSave.setVerified(true);
+        studentToSave.setOtp(null);
 
         Student savedStudent = studentRepository.save(studentToSave);
         waitingRoom.remove(email);
@@ -94,7 +95,7 @@ public class StudentService {
         );
     }
 
-    private StudentDto convertToDto(Student student){
+    public StudentDto convertToDto(Student student){
 
         StudentDto dto =new StudentDto();
         dto.setId(student.getId());
@@ -136,7 +137,7 @@ public class StudentService {
 
 //        StudentDto dto=new StudentDto();
 //        dto.setId(student.getId());
-//        dto.setName(student.getName());r5r
+//        dto.setName(student.getName());
 //        dto.setCourse(student.getCourse());
 //        dto.setEmail(student.getEmail());
 //        dto.setRollNumber(student.getRollNumber());

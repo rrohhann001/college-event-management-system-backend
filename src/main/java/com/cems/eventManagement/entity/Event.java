@@ -2,6 +2,7 @@ package com.cems.eventManagement.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -28,6 +29,7 @@ public class Event {
     @Column(nullable = false)
     private String location;
 
+    @Min(value = 1, message = "event capacity must be at least 1")
     @Column(name = "capacity", nullable = false)
     private int capacity;
 

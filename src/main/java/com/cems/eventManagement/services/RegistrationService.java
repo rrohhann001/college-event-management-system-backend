@@ -1,5 +1,6 @@
 package com.cems.eventManagement.services;
 
+import com.cems.eventManagement.dto.StudentDto;
 import com.cems.eventManagement.entity.Event;
 import com.cems.eventManagement.entity.Registration;
 import com.cems.eventManagement.entity.Student;
@@ -8,6 +9,7 @@ import com.cems.eventManagement.repository.RegistrationRepository;
 import com.cems.eventManagement.repository.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +27,10 @@ public class RegistrationService {
     @Autowired
     private StudentRepository studentRepository;
 
+    @Autowired
+    private StudentService studentService;
+
+    @Transactional
     public Registration RegisterStudentForEvent(String email, Long eventId){
         Student student=studentRepository.findByEmail(email).orElseThrow(()-> new RuntimeException("Student not found"));
 
@@ -53,16 +59,20 @@ public class RegistrationService {
     }
 
     // 1. Ek Event me kitne students hain, unki list lana
-    public List<Student> getRegistrationByEventsId(Long eventId){
+    public List<StudentDto> getRegistrationByEventsId(Long eventId){
 
         //return registrationRepository.findByEventId(eventId); ish se har baar event ke saath student details bhi aa rahi thi
         List<Registration> registrations=registrationRepository.findByEventId(eventId);
 
-        List<Student> students= new ArrayList<>();
-        for (Registration r:registrations){
-            students.add(r.getStudent());
+        List<StudentDto> studentDtos= new ArrayList<>();
+        for (Registration r:registrations) {
+            Student student = r.getStudent();
+
+            StudentDto safeStudent = studentService.convertToDto(student);
+
+            studentDtos.add(safeStudent);
         }
-        return students;
+        return studentDtos;
     }
 
     //Ek Student kis-kis event me hai, uski list lana
@@ -82,6 +92,7 @@ public class RegistrationService {
         return events;
     }
 
+    @Transactional
     public String cancelRegistration(String email, Long eventId){
 
         Student student = studentRepository.findByEmail(email)
