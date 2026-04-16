@@ -17,7 +17,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ApiResponse<String>> handleRuntimeException(RuntimeException ex){
 
-        ApiResponse<String> response = new ApiResponse<>();
+        String errormsg = (ex.getMessage()!=null )? ex.getMessage() : "Internal Server Error";
+        ApiResponse<String> response = new ApiResponse<>(false, errormsg);
 
         if(ex.getMessage().toLowerCase().contains("not found")){
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);

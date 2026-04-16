@@ -5,12 +5,15 @@ import com.cems.eventManagement.dto.StudentDto;
 import com.cems.eventManagement.entity.Student;
 import com.cems.eventManagement.repository.StudentRepository;
 import com.cems.eventManagement.security.JwtUtil;
+import com.cems.eventManagement.security.RateLimitingService;
 import com.cems.eventManagement.services.StudentService;
+import io.github.bucket4j.Bucket;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -32,6 +35,9 @@ public class StudentController {
 
     @Autowired
     private JwtUtil jwtUtil;
+
+    @Autowired
+    private RateLimitingService rateLimitingService;
 
 //    @PostMapping
 //    public Student registerStudent(@Valid @RequestBody Student student){
@@ -56,6 +62,11 @@ public class StudentController {
     @PostMapping("/verify")
     public ResponseEntity<ApiResponse<Map<String, Object>>> verifyOtp(@RequestParam String email, @RequestParam String otp){
 
+        Bucket bucket = rateLimitingService.resolveBucket(email);
+        if(!bucket.tryConsume(1)){
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                    .body(new ApiResponse<>(false, "Too many OTP verification attempts. Please wait 1 minute.", null));
+        }
         try {
             Student saveStudent=studentService.verifyOtpAndSave(email, otp);
 
