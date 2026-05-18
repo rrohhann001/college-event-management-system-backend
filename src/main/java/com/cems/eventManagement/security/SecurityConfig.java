@@ -53,6 +53,8 @@ public class SecurityConfig {
 
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/registrations/event/**").hasAuthority("ADMIN")
 
+                        .requestMatchers("/", "/index.html", "/style.css", "/app.js").permitAll()
+
                         // 2. Baaki SAARI APIs par taala laga do (Token zaroori hai)
                         .anyRequest().authenticated()
                 )

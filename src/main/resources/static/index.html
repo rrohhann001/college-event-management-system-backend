@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Event | College Event Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ===== AUTH PAGES (Login / Register / OTP) ===== -->
+<div class="auth-wrapper" id="authWrapper">
+
+    <div class="auth-bg-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+
+    <div class="auth-card" id="authCard">
+
+        <div class="auth-brand">
+            <div class="brand-icon">🎓</div>
+            <h1>E-Event</h1>
+            <p>College Event Management Portal</p>
+        </div>
+
+        <div id="alertBox" class="alert hidden"></div>
+
+        <!-- LOGIN -->
+        <div id="loginSection" class="auth-section">
+            <h2 class="section-title">Welcome Back</h2>
+            <p class="section-sub">Sign in to your portal account</p>
+            <form id="loginForm" class="modern-form" autocomplete="off">
+                <div class="input-group">
+                    <label>Email Address</label>
+                    <input type="email" id="loginEmail" placeholder="you@college.edu" required>
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <div class="password-wrap">
+                        <input type="password" id="loginPassword" placeholder="••••••••" required>
+                        <button type="button" class="eye-btn" onclick="togglePassword('loginPassword', this)">👁️</button>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">
+                    <span>Login to Dashboard</span>
+                    <span class="btn-arrow">→</span>
+                </button>
+            </form>
+            <p class="switch-link">New student? <a href="#" onclick="showAuthSection('registerSection')">Create Account</a></p>
+        </div>
+
+        <!-- REGISTER -->
+        <div id="registerSection" class="auth-section hidden">
+            <h2 class="section-title">Create Account</h2>
+            <p class="section-sub">Fill in your details to get started</p>
+            <form id="registerForm" class="modern-form" autocomplete="off">
+                <div class="input-group">
+                    <label>Full Name</label>
+                    <input type="text" id="regName" placeholder="Rohan Singh" required>
+                </div>
+                <div class="input-group">
+                    <label>College Email</label>
+                    <input type="email" id="regEmail" placeholder="rohan@college.edu" required>
+                </div>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Roll Number</label>
+                        <input type="text" id="regRollNo" placeholder="e.g. 21BCA001" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Course</label>
+                        <input type="text" id="regDepartment" placeholder="e.g. BCA" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Create Password</label>
+                    <div class="password-wrap">
+                        <input type="password" id="regPassword" placeholder="Min. 6 characters" required>
+                        <button type="button" class="eye-btn" onclick="togglePassword('regPassword', this)">👁️</button>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">
+                    <span>Register & Get OTP</span>
+                    <span class="btn-arrow">→</span>
+                </button>
+            </form>
+            <p class="switch-link">Already registered? <a href="#" onclick="showAuthSection('loginSection')">Login here</a></p>
+        </div>
+
+        <!-- OTP VERIFICATION -->
+        <div id="otpSection" class="auth-section hidden">
+            <h2 class="section-title">Verify Email</h2>
+            <p class="section-sub">A 6-digit OTP has been sent to your email</p>
+            <div id="timerDisplay" class="timer-box">⏱️ 02:00</div>
+            <form id="otpForm" class="modern-form">
+                <div class="input-group">
+                    <label>Enter OTP</label>
+                    <input type="text" id="otpCode" placeholder="• • • • • •" maxlength="6"
+                           style="text-align:center; font-size:22px; letter-spacing:8px; font-family:'JetBrains Mono', monospace;" required>
+                </div>
+                <button type="submit" id="verifyBtn" class="btn btn-success btn-full">
+                    <span>Verify & Login</span>
+                    <span class="btn-arrow">✓</span>
+                </button>
+            </form>
+            <p class="switch-link"><a href="#" onclick="showAuthSection('registerSection')">← Back to Register</a></p>
+        </div>
+
+    </div>
+</div>
+
+<!-- ===== DASHBOARD ===== -->
+<div id="dashboardWrapper" class="dashboard-wrapper hidden">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-icon-sm">🎓</div>
+            <span>E-Event</span>
+        </div>
+
+        <div class="sidebar-profile">
+            <div class="profile-avatar" id="profileAvatar">R</div>
+            <div class="profile-meta">
+                <p class="profile-name" id="profileName">Student</p>
+                <p class="profile-email" id="profileEmail">email@college.edu</p>
+                <span class="profile-badge" id="profileBadge">Student</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <button class="nav-item active" id="navEvents" onclick="switchTab('eventsTab', this)">
+                <span class="nav-icon">📅</span>
+                <span>All Events</span>
+            </button>
+            <button class="nav-item" id="navMyTickets" onclick="switchTab('myEventsTab', this)">
+                <span class="nav-icon">🎟️</span>
+                <span>My Tickets</span>
+            </button>
+            <button class="nav-item hidden" id="navAdmin" onclick="switchTab('adminTab', this)">
+                <span class="nav-icon">⚙️</span>
+                <span>Admin Panel</span>
+            </button>
+            <button class="nav-item hidden" id="navStudents" onclick="switchTab('studentsTab', this)">
+                <span class="nav-icon">👥</span>
+                <span>All Students</span>
+            </button>
+            <button class="nav-item" id="navProfile" onclick="switchTab('profileTab', this)">
+                <span class="nav-icon">👤</span>
+                <span>Profile</span>
+            </button>
+        </nav>
+
+        <button onclick="logout()" class="sidebar-logout">
+            <span>🚪</span> Logout
+        </button>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+        <!-- Mobile Topbar -->
+        <div class="mobile-topbar">
+            <button class="hamburger" onclick="toggleSidebar()">☰</button>
+            <span class="mobile-brand">🎓 E-Event</span>
+            <button onclick="logout()" class="mobile-logout">🚪</button>
+        </div>
+
+        <div id="dashboardAlertBox" class="alert hidden" style="margin-bottom: 20px;"></div>
+
+        <!-- EVENTS TAB -->
+        <div id="eventsTab" class="tab-content">
+            <div class="page-header">
+                <div>
+                    <h2 class="page-title">Upcoming Events</h2>
+                    <p class="page-sub">Discover and register for college events</p>
+                </div>
+                <button onclick="loadEvents()" class="btn btn-outline btn-sm">🔄 Refresh</button>
+            </div>
+            <div id="eventsList" class="events-grid">
+                <div class="loading-skeleton"></div>
+                <div class="loading-skeleton"></div>
+                <div class="loading-skeleton"></div>
+            </div>
+        </div>
+
+        <!-- MY TICKETS TAB -->
+        <div id="myEventsTab" class="tab-content hidden">
+            <div class="page-header">
+                <div>
+                    <h2 class="page-title">My Tickets</h2>
+                    <p class="page-sub">Events you've registered for</p>
+                </div>
+                <button onclick="loadMyTickets()" class="btn btn-outline btn-sm">🔄 Refresh</button>
+            </div>
+            <div id="myEventsList" class="events-grid"></div>
+        </div>
+
+        <!-- ADMIN TAB -->
+        <div id="adminTab" class="tab-content hidden">
+            <div class="page-header">
+                <div>
+                    <h2 class="page-title">Admin Panel</h2>
+                    <p class="page-sub">Create events and manage registrations</p>
+                </div>
+            </div>
+            <div class="admin-layout">
+                <!-- Create Event Form -->
+                <div class="admin-card card">
+                    <h3 class="card-title">➕ Create New Event</h3>
+                    <form id="createEventForm" class="modern-form">
+                        <div class="input-group">
+                            <label>Event Name</label>
+                            <input type="text" id="evName" placeholder="e.g. Annual Tech Fest 2025" required>
+                        </div>
+                        <div class="input-row">
+                            <div class="input-group">
+                                <label>Location / Venue</label>
+                                <input type="text" id="evLocation" placeholder="e.g. Main Auditorium" required>
+                            </div>
+                            <div class="input-group">
+                                <label>Event Date</label>
+                                <input type="date" id="evDate" required>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Capacity (Max Attendees)</label>
+                            <input type="number" id="evCapacity" placeholder="e.g. 500" min="1" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Description</label>
+                            <textarea id="evDesc" placeholder="Full event details, schedule, requirements..." rows="4" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-admin btn-full">
+                            <span>🚀 Launch Event</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Registrations Viewer -->
+                <div class="card">
+                    <h3 class="card-title">📋 Event Registrations</h3>
+                    <p class="help-text">Click "View Attendees" on any event card to see registrations here.</p>
+                    <div id="adminRegistrationsList" class="registration-view">
+                        <div class="empty-state">
+                            <span class="empty-icon">👆</span>
+                            <p>Select an event to view attendees</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ALL STUDENTS TAB (Admin Only) -->
+        <div id="studentsTab" class="tab-content hidden">
+            <div class="page-header">
+                <div>
+                    <h2 class="page-title">All Students</h2>
+                    <p class="page-sub">Registered students on the portal</p>
+                </div>
+                <button onclick="loadAllStudents()" class="btn btn-outline btn-sm">🔄 Refresh</button>
+            </div>
+            <div id="studentsList" class="students-table-wrap">
+                <div class="loading-skeleton"></div>
+            </div>
+        </div>
+
+        <!-- PROFILE TAB -->
+        <div id="profileTab" class="tab-content hidden">
+            <div class="page-header">
+                <div>
+                    <h2 class="page-title">My Profile</h2>
+                    <p class="page-sub">Your account details</p>
+                </div>
+            </div>
+            <div class="profile-layout">
+                <div class="card profile-card">
+                    <div class="profile-header-section">
+                        <div class="profile-avatar-lg" id="profileAvatarLg">R</div>
+                        <div>
+                            <h3 id="profileFullName">-</h3>
+                            <p id="profileFullEmail" style="color: var(--text-muted); font-size: 14px;">-</p>
+                            <span class="profile-badge" id="profileBadgeLg" style="margin-top:8px; display:inline-block;">Student</span>
+                        </div>
+                    </div>
+                    <div class="profile-details">
+                        <div class="detail-row">
+                            <span class="detail-label">👤 Name</span>
+                            <span class="detail-value" id="detailName">-</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">✉️ Email</span>
+                            <span class="detail-value" id="detailEmail">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Danger Zone (Students Only) -->
+                <div class="card danger-zone-card hidden" id="studentDangerZone">
+                    <h3 class="danger-title">⚠️ Danger Zone</h3>
+                    <p>Deleting your account is permanent. All your registered tickets will also be removed. This action cannot be undone.</p>
+                    <button onclick="deleteMyAccount()" class="btn btn-danger" style="margin-top:15px;">
+                        🗑️ Permanently Delete My Account
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<!-- Sidebar Overlay (mobile) -->
+<div class="sidebar-overlay hidden" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
